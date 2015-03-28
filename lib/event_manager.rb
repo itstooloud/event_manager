@@ -1,35 +1,40 @@
 require 'csv'
-puts "Event manager initialized!"
+require 'sunlight/congress'
+#puts "Event manager initialized!"
+
+Sunlight::Congress.api_key = "e179a6973728c4dd3fb1204283aaccb5"
 
 
-#contents = File.open("event_attendees.csv").read
-#puts contents
-=begin
-METHOD PRIOR TO USING RUBY'S BUILT-IN CSV FUNCTION	
+def clean_zipcode(zipcode)
 
-lines = File.readlines "event_attendees.csv"
+	zipcode.to_s.rjust(5,"0")[0..4]
+	#calling to_s on a nil results in ""
+	#rjust will pad a "" to "00000"
 
-lines.each_with_index do |line, index|
-	next if index == 0
-	columns = line.split(",")
-	name = columns[2]
-	puts name
 end
 
-=end
+def legislators_by_zipcode(zipcode)
+
+	legislators = Sunlight::Congress::Legislator.by_zipcode(zipcode)
+
+  	legislator_names = legislators.collect do |legislator|
+    	"#{legislator.first_name} #{legislator.last_name}"
+  	end
+
+  	legislator_names.join(", ")
+	
+end
 
 contents = CSV.open "event_attendees.csv", headers: true, header_converters: :symbol
 contents.each do |row|
 	name = row[:first_name]
-	zipcode = row[:zipcode]
-	if zipcode.nil?
-		zipcode = "00000"
-	elsif zipcode.length > 5
-		zipcode = zipcode.match(/...../)
-	elsif zipcode.length < 5
-		zipcode = zipcode.rjust 5, "0"
-	end
-		
-	puts "#{name}  #{zipcode}"
+	zipcode = clean_zipcode(row[:zipcode])
+	legislators = legislators_by_zipcode(zipcode)
+
+	puts "#{name}  #{zipcode}   #{legislators}"
 
 end
+
+
+
+
