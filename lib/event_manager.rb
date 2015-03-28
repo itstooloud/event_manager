@@ -1,6 +1,6 @@
 require 'csv'
 require 'sunlight/congress'
-#puts "Event manager initialized!"
+template_letter = File.read "form_letter.html"
 
 Sunlight::Congress.api_key = "e179a6973728c4dd3fb1204283aaccb5"
 
